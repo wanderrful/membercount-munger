@@ -1,4 +1,4 @@
-import * as Test from "./scrape_utils";
+import * as Scrape from "./scrape_utils";
 
 let url: string = "http://steamcommunity.com/groups/fuckfuckgames";
 let selector: string = ".repository-meta";
@@ -10,11 +10,11 @@ let model = {
 
 
 
-let config: Test.Config = {
+let config: Scrape.Config = {
     url: url,
     config: model
 };
 
 
 
-Test.fn_run(config);
+Scrape.fn_run(config);
