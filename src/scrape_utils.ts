@@ -12,6 +12,7 @@ export interface Config {
 export function fn_getGroupData(config: Config): void {
     scrapy.scrape(config.url, config.model, (err,data) => {
         if (err) return console.error(err);
+        
         console.log({
             timestamp: fn_getTimeStamp(),
             ...data
