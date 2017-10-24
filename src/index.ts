@@ -1,9 +1,20 @@
-import * as scrapy from "node-scrapy";
+import * as Test from "./scrape_utils";
 
-let url: string = "https://github.com/strongloop/express";
+let url: string = "http://steamcommunity.com/groups/fuckfuckgames";
 let selector: string = ".repository-meta";
+let model = { 
+    count: ".content .membercounts .membercount.members .count",
+    ingame: ".content .membercounts .membercount.ingame .count",
+    online: ".content .membercounts .membercount.online .count"
+};
 
-scrapy.scrape(url, selector, (err,data) => {
-    if (err) return console.error(err);
-    console.log(data);
-});
+
+
+let config: Test.Config = {
+    url: url,
+    config: model
+};
+
+
+
+Test.fn_run(config);
