@@ -11,9 +11,11 @@
   "license": "ISC",
   "private": true,
   "devDependencies": {
+    "@types/node": "^8.0.46",
     "typescript": "^2.5.3"
   },
   "dependencies": {
+    "node-scrapy": "^0.3.1",
     "pg": "^7.3.0"
   }
 }

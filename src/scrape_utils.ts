@@ -100,7 +100,7 @@ function fn_insert(client: pg.Client, query: Object|string, func:(args?: any) =>
 export function fn_run(): void {
     // Configure the data object for scraping
     let config: Config = {
-        url: "http://steamcommunity.com/groups/fuckfuckgames",
+        url: process.env.GROUP_URL,
         model: { 
             count: ".content .membercounts .membercount.members .count",
             ingame: ".content .membercounts .membercount.ingame .count",
@@ -114,7 +114,7 @@ export function fn_run(): void {
     // Finally, begin the looping scrape for data
     setInterval( () => {
         fn_getGroupData(config);
-    }, 30 * 60 * 1000);
+    }, Number(process.env.CHECK_INTERVAL) * 60 * 1000);
 }
 
 

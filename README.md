@@ -1,0 +1,3 @@
+Periodically scrapes the given Steamcommunity.com group page, read from the GROUP\_URL environment variable, for the current numbers of online group members.  It then records the data, along with a timestamp, into a PostgreSQL database for later analysis!  The frequency of scrapes is defined by the CHECK\_INTERVAL environment variable.
+
+This repo works in conjunction with my own personal Heroku app so that it runs persistently.
