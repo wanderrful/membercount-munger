@@ -1,7 +1,6 @@
 import * as Scrape from "./scrape_utils";
 
 let url: string = "http://steamcommunity.com/groups/fuckfuckgames";
-let selector: string = ".repository-meta";
 let model = { 
     count: ".content .membercounts .membercount.members .count",
     ingame: ".content .membercounts .membercount.ingame .count",
@@ -12,9 +11,9 @@ let model = {
 
 let config: Scrape.Config = {
     url: url,
-    config: model
+    model: model
 };
 
 
 
-Scrape.fn_run(config);
+Scrape.fn_getGroupData(config);

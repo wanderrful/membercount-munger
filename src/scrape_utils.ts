@@ -4,13 +4,13 @@ import * as scrapy from "node-scrapy";
 
 export interface Config {
     url: string,
-    config: any
+    model: any
 };
 
 
 
-export function fn_run(config: Config): void {
-    scrapy.scrape(config.url, config.config, (err,data) => {
+export function fn_getGroupData(config: Config): void {
+    scrapy.scrape(config.url, config.model, (err,data) => {
         if (err) return console.error(err);
         console.log({
             timestamp: fn_getTimeStamp(),
@@ -19,7 +19,7 @@ export function fn_run(config: Config): void {
     });
 }
 
-export function fn_getTimeStamp(): Object {
+function fn_getTimeStamp(): Object {
     // Create a date object with the current time
     let now: Date = new Date();
     // Create an array with the current month, day and time
