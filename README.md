@@ -1,4 +1,8 @@
-Periodically scrapes the given Steamcommunity.com group page, read from the GROUP\_NAME environment variable, for the current numbers of online group members.  It then records the data, along with a timestamp, into a PostgreSQL database for later analysis!  The frequency of scrapes is defined by the CHECK\_INTERVAL environment variable.
+I wanted a way to figure out when the best times to schedule group events for me and my friends, so I made a Worker Dyno hosted by Heroku that will record onto a database the steam group member count numbers every hour.  After letting it run for about a month, I can analyze the data from the database to figure out the best times for us to get together and play!
+
+---
+
+More specifically, it periodically scrapes the given Steamcommunity.com group page, read from the GROUP\_NAME environment variable, for the current numbers of online group members.  It then records the data, along with a timestamp, into a PostgreSQL database for later analysis!  The frequency of scrapes is defined by the CHECK\_INTERVAL environment variable.
 
 This repo works in conjunction with my own personal Heroku app so that it runs persistently.
 
@@ -16,3 +20,11 @@ To make this work for you:
 - View your app's logs on the Heroku site to make sure that it is recording everything properly.
 - Wait for a week or two
 - Use the data accumulated in your Heroku database for whatever you need!
+
+---
+
+Technology used:
+
+- TypeScript
+- Node-Scrapy
+- PostgreSQL
