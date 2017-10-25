@@ -1,8 +1,11 @@
-/* This file is meant to be run by a worker via one of Heroku's Dyno things.
-
- * The purpose of this file is to monitor the Steam group's player counts
- * so that I can use it to figure out when most people are online. That
- * way, I can know when the best times to host group events are!
+/* 
+ * This ScrapeWorker class is meant to be run by a worker via one of 
+ * Heroku's Dyno things.
+ *
+ * Its purpose is to monitor the Steam group's player counts and
+ * record the data so that I can figure out when most of my friends
+ * are online. That way, I can know when the best times to host group
+ * events are!
  * 
  */
 import * as scrapy from "node-scrapy";  // to get the data
@@ -11,7 +14,7 @@ import * as pg from "pg";               // to record the data
 
 
 interface IWorkerConfig {
-    group_url: string,
+    group_name: string,
     check_interval: number
 };
 interface IScrapeConfig {
@@ -38,19 +41,6 @@ export default class ScrapeWorker extends pg.Client {
     public group_url: string;
     public check_interval: number;
 
-
-
-    /// PostgreSQL query strings
-    public db_initQuery: string = `
-CREATE TABLE IF NOT EXISTS db_membercounts(
-    timestamp text not null primary key, count numeric not null, ingame numeric not null, online numeric not null
-)`;
-    public db_insertQuery: string = `
-INSERT INTO db_membercounts 
-VALUES(
-    $1
-)`;
-
     
     
     /// Constructor
@@ -65,8 +55,10 @@ VALUES(
             this.fn_log('Notice:', msg);
         });
 
-        this.group_url = config.group_url;
-        this.check_interval = config.check_interval;
+        this.group_url = "http://steamcommunity.com/groups/" + config.group_name;
+        this.check_interval = config.check_interval * 60 * 1000;
+
+        this.fn_login(this.fn_db_initMasterTable);
     }
 
 
@@ -82,7 +74,7 @@ VALUES(
     fn_getTimeStamp(): ITimeStamp {
         let now: Date = new Date();
         let date: Array<String> = [ String(now.getMonth() + 1), String(now.getDate()), String(now.getFullYear()) ];
-        let time: Array<String> = [ String(now.getHours()), String(now.getMinutes())];
+        let time: Array<String> = [ String(now.getHours()) ];
         for (let i of time) {  
             if ( Number(i) < 10 ) {
               i = "0" + i;
@@ -108,32 +100,8 @@ VALUES(
                 
                 // Now that we are logged in, attempt to initialize the master table
                 do_the_thing();
-
-                this.end( (err) => {
-                    if (err) {
-                        this.fn_log("ERROR DURING DISCONNECTION", err.stack);
-                    }
-                    this.fn_log("DISCONNECTED");
-                });
             }
         });
-    }
-
-    // Initialize the master table, if it does not already exist.
-    fn_initMasterTable(): void {
-        this.query({
-            text: this.db_initQuery
-        }, (err, res) => {
-            if (err) {
-                this.fn_log("QUERY ERROR", err.stack);
-            }
-            this.end();
-        });
-    }
-
-    // Scrape the bot's assigned page to get and return the configured data.
-    fn_getGroupData(config: IScrapeConfig): void {
-        
     }
 
     // The main entry point for actually doing work
@@ -148,11 +116,13 @@ VALUES(
             }
         };
 
+        // Scrape the assigned webpage for the needed data
         scrapy.scrape(config.url, config.model, (err,data: IModelConfig) => {
             if (err) return console.error(err);
             
+            // Connect to the database, do the thing, and close the connection
             this.fn_login( () => {
-                this.fn_writeToDatabase({
+                this.fn_db_writeToDatabase({
                     timestamp: this.fn_getTimeStamp(),
                     ...data
                 })
@@ -160,29 +130,42 @@ VALUES(
         });
     }
 
-    fn_writeToDatabase(data: IRowData): void {
-        throw "Not yet implemented!";
+    /// Database query functions!
+    // Initialize the master table, if it does not already exist.
+    fn_db_initMasterTable(): void {
+        this.query({
+            text: "CREATE TABLE IF NOT EXISTS db_membercounts(timestamp_date text not null primary key, timestamp_time text not null, count text not null, ingame text not null, online text not null)"
+        }, (err, res) => {
+            this.fn_db_handleQueryResult(err,res);
+            this.fn_db_closeConnection();
+        });
+    }
+    // Insert a new row into the master table with the given data
+    fn_db_writeToDatabase(data: IRowData): void {
+        this.query({
+            text: "INSERT INTO db_membercounts VALUES($1, $2, $3, $4, $5)",
+            values: [data.timestamp.date, data.timestamp.time, data.count, data.ingame, data.online]
+        }, (err, res) => {
+            this.fn_db_handleQueryResult(err,res);
+            this.fn_db_closeConnection();
+        });
+    }
+    // Utility function to report errors or results from query attempts
+    fn_db_handleQueryResult(err: Error, res: pg.QueryResult, do_the_thing?: () => void) {
+        if (err) {
+            this.fn_log("QUERY ERROR", err.stack);
+        } else {
+            this.fn_log("QUERY RESULT", res.rows)
+        }
+        do_the_thing();
+    }
+    // Close the connection to the PostgreSQL server!
+    fn_db_closeConnection(): void {
+        this.end( (err) => {
+            if (err) {
+                this.fn_log("ERROR DURING DISCONNECTION", err.stack);
+            }
+            this.fn_log("DISCONNECTED");
+        });
     }
 };
-//(Number(process.env.CHECK_INTERVAL) * 60 * 1000 ) )
-
-
-////
-
-
-
-
-
-function fn_query(client: pg.Client, query: pg.QueryConfig|string, func: (args?: any) => any ): void {
-    client.query(query, (err, res) => {
-        if (err) {
-            console.error("*** DB ERROR: ", err.stack);
-        } else {
-            console.log(res.rows);
-            func(res);
-        }
-    });
-}
-function fn_insert(client: pg.Client, query: pg.QueryConfig|string, func:(args?: any) => any): void {
-    fn_query(client, query, func());
-}

@@ -3,7 +3,9 @@ import ScrapeWorker from "./scrape_utils";
 
 
 let worker = new ScrapeWorker({
-    group_url: String(process.env.GROUP_URL),
+    group_name: String(process.env.GROUP_NAME),
     check_interval: Number(process.env.CHECK_INTERVAL)
 });
-worker.fn_run();
+
+// Begin the work cycle
+setInterval( worker.fn_run(), worker.check_interval);
