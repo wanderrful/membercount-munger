@@ -7,15 +7,15 @@ const pg = require("pg");
 ;
 ;
 ;
-class ScrapeWorker extends pg.Client {
+class ScrapeWorker {
     constructor(config) {
-        super({
+        this.client = new pg.Client({
             connectionString: process.env.DATABASE_URL
         });
-        this.on("error", (err) => {
+        this.client.on("error", (err) => {
             this.fn_log("ERROR:", err.stack);
         });
-        this.on('notice', (msg) => {
+        this.client.on('notice', (msg) => {
             this.fn_log('Notice:', msg);
         });
         this.group_url = "http://steamcommunity.com/groups/" + config.group_name;
@@ -23,7 +23,7 @@ class ScrapeWorker extends pg.Client {
         this.fn_login(this.fn_db_initMasterTable);
     }
     fn_login(do_the_thing) {
-        this.connect((err) => {
+        this.client.connect((err) => {
             if (err) {
                 this.fn_log("CONNECTION ERROR", err.stack);
             }
@@ -51,7 +51,7 @@ class ScrapeWorker extends pg.Client {
         });
     }
     fn_db_initMasterTable() {
-        this.query({
+        this.client.query({
             text: "CREATE TABLE IF NOT EXISTS db_membercounts(timestamp_date text not null primary key, timestamp_time text not null, count text not null, ingame text not null, online text not null)"
         }, (err, res) => {
             this.fn_db_handleQueryResult(err, res);
@@ -59,7 +59,7 @@ class ScrapeWorker extends pg.Client {
         });
     }
     fn_db_writeToDatabase(data) {
-        this.query({
+        this.client.query({
             text: "INSERT INTO db_membercounts VALUES($1, $2, $3, $4, $5)",
             values: [data.timestamp.date, data.timestamp.time, data.count, data.ingame, data.online]
         }, (err, res) => {
@@ -77,7 +77,7 @@ class ScrapeWorker extends pg.Client {
         do_the_thing();
     }
     fn_db_closeConnection() {
-        this.end((err) => {
+        this.client.end((err) => {
             if (err) {
                 this.fn_log("ERROR DURING DISCONNECTION", err.stack);
             }

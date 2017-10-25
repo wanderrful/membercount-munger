@@ -36,8 +36,9 @@ interface IRowData extends IModelConfig {
 
 
 
-export default class ScrapeWorker extends pg.Client {
+export default class ScrapeWorker {
     /// Class members
+    public client: pg.Client;
     public group_url: string;
     public check_interval: number;
 
@@ -45,15 +46,15 @@ export default class ScrapeWorker extends pg.Client {
     
     /// Constructor
     constructor(config: IWorkerConfig) {
-        super({
+        this.client = new pg.Client({
             connectionString: process.env.DATABASE_URL
         }); //database login details are pulled automatically from environment variables!
 
-        this.on("error", (err) => {
+        this.client.on("error", (err) => {
             this.fn_log("ERROR:", err.stack);
         });
 
-        this.on('notice', (msg) => { 
+        this.client.on('notice', (msg) => { 
             this.fn_log('Notice:', msg);
         });
 
@@ -69,7 +70,7 @@ export default class ScrapeWorker extends pg.Client {
     // Use this to access the database.  Called in the constructor.
     fn_login(do_the_thing: () => void): void {
         // Attempt to connect to the PostgreSQL Database!
-        this.connect((err) => {
+        this.client.connect((err) => {
             if (err) {
                 this.fn_log("CONNECTION ERROR", err.stack);
             } else {
@@ -112,7 +113,7 @@ export default class ScrapeWorker extends pg.Client {
     /// Database query functions!
     // Initialize the master table, if it does not already exist.
     fn_db_initMasterTable(): void {
-        this.query({
+        this.client.query({
             text: "CREATE TABLE IF NOT EXISTS db_membercounts(timestamp_date text not null primary key, timestamp_time text not null, count text not null, ingame text not null, online text not null)"
         }, (err, res) => {
             this.fn_db_handleQueryResult(err,res);
@@ -121,7 +122,7 @@ export default class ScrapeWorker extends pg.Client {
     }
     // Insert a new row into the master table with the given data
     fn_db_writeToDatabase(data: IRowData): void {
-        this.query({
+        this.client.query({
             text: "INSERT INTO db_membercounts VALUES($1, $2, $3, $4, $5)",
             values: [data.timestamp.date, data.timestamp.time, data.count, data.ingame, data.online]
         }, (err, res) => {
@@ -140,7 +141,7 @@ export default class ScrapeWorker extends pg.Client {
     }
     // Closes the connection to the PostgreSQL server!
     fn_db_closeConnection(): void {
-        this.end( (err) => {
+        this.client.end( (err) => {
             if (err) {
                 this.fn_log("ERROR DURING DISCONNECTION", err.stack);
             }

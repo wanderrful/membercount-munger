@@ -7,5 +7,7 @@ let worker = new ScrapeWorker({
     check_interval: Number(process.env.CHECK_INTERVAL)
 });
 
+
+
 // Begin the work cycle
 setInterval( worker.fn_run, worker.check_interval);
