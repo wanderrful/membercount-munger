@@ -18,10 +18,10 @@ const worker = new pg.Client({
 
 // Worker event handlers
 worker.on("error", (err) => {
-    Scrape.fn_log("ERROR:", err.stack);
+    Scrape.fn_log("ERROR:", err.message);
 });
 worker.on('notice', (msg) => { 
-    Scrape.fn_log('Notice:', msg);
+    Scrape.fn_log('Notice:', msg.message);
 });
 
 
@@ -61,7 +61,7 @@ function fn_login(do_the_thing: () => void): void {
         } else {
             Scrape.fn_log("CONNECTION SUCCESSFUL");
             
-            // Now that we are logged in, attempt to initialize the master table
+            // Now that we are logged in, do the thing
             do_the_thing();
         }
     });
@@ -90,13 +90,12 @@ function fn_db_writeToDatabase(data: Scrape.IRowData): void {
     });
 }
 // Reports errors or results from query attempts
-function fn_db_handleQueryResult(err: Error, res: pg.QueryResult, do_the_thing?: () => void) {
+function fn_db_handleQueryResult(err: Error, res: pg.QueryResult) {
     if (err) {
         Scrape.fn_log("QUERY ERROR", err.stack);
     } else {
         Scrape.fn_log("QUERY RESULT", res.rows)
     }
-    do_the_thing();
 }
 // Closes the connection to the PostgreSQL server!
 function fn_db_closeConnection(): void {

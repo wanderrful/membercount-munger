@@ -11,10 +11,10 @@ const worker = new pg.Client({
     connectionString: process.env.DATABASE_URL
 });
 worker.on("error", (err) => {
-    Scrape.fn_log("ERROR:", err.stack);
+    Scrape.fn_log("ERROR:", err.message);
 });
 worker.on('notice', (msg) => {
-    Scrape.fn_log('Notice:', msg);
+    Scrape.fn_log('Notice:', msg.message);
 });
 function fn_run() {
     let scrape_config = {
@@ -61,14 +61,13 @@ function fn_db_writeToDatabase(data) {
         fn_db_closeConnection();
     });
 }
-function fn_db_handleQueryResult(err, res, do_the_thing) {
+function fn_db_handleQueryResult(err, res) {
     if (err) {
         Scrape.fn_log("QUERY ERROR", err.stack);
     }
     else {
         Scrape.fn_log("QUERY RESULT", res.rows);
     }
-    do_the_thing();
 }
 function fn_db_closeConnection() {
     worker.end((err) => {
