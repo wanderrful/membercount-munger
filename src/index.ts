@@ -8,4 +8,4 @@ let worker = new ScrapeWorker({
 });
 
 // Begin the work cycle
-setInterval( worker.fn_run(), worker.check_interval);
+setInterval( worker.fn_run, worker.check_interval);
