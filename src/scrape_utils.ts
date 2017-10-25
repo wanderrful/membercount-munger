@@ -37,7 +37,7 @@ export interface IRowData extends IModelConfig {
 
 /// Utility functions
 // To make console.log have a consistent format
-export function fn_log(text: string, args?: any): void {
+export function fn_log(text: string, args: any = "--"): void {
     console.log("*** DB ::  ", text, " :: ", args);
 }
 

@@ -56,7 +56,7 @@ function fn_db_handleQueryResult(err, res) {
         Scrape.fn_log("QUERY ERROR", err.stack);
     }
     else {
-        Scrape.fn_log("QUERY RESULT", res.rows);
+        Scrape.fn_log("QUERY SUCCESS");
     }
 }
 function fn_db_closeConnection() {

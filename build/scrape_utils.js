@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 ;
 ;
 ;
-function fn_log(text, args) {
+function fn_log(text, args = "--") {
     console.log("*** DB ::  ", text, " :: ", args);
 }
 exports.fn_log = fn_log;

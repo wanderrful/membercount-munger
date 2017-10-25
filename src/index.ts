@@ -80,7 +80,7 @@ function fn_db_handleQueryResult(err: Error, res: pg.QueryResult) {
     if (err) {
         Scrape.fn_log("QUERY ERROR", err.stack);
     } else {
-        Scrape.fn_log("QUERY RESULT", res.rows)
+        Scrape.fn_log("QUERY SUCCESS")
     }
 }
 // Closes the connection to the PostgreSQL server!
