@@ -36,7 +36,7 @@ function fn_getTimeStamp(): Object {
     let time: Array<String> = [ String(now.getHours()), String(now.getMinutes())];
 
     for (let i of time) {  
-        if ( Number(i) < 10 ) {
+        if ( +(i) < 10 ) {
           i = "0" + i;
         }
     }
@@ -62,7 +62,7 @@ VALUES(
 
 // PostgreSQL functions
 function fn_connectToDB(): pg.Client {
-    const client = new pg.Client();
+    const client = new pg.Client({});
 
     client.connect((err) => {
         if (err) {
@@ -80,7 +80,7 @@ function fn_connectToDB(): pg.Client {
 
     return client;
 }
-function fn_query(client: pg.Client, query: Object|string, func: (args?: any) => any ): void {
+function fn_query(client: pg.Client, query: pg.QueryConfig|string, func: (args?: any) => any ): void {
     client.query(query, (err, res) => {
         if (err) {
             console.error("*** DB ERROR: ", err.stack);
@@ -90,7 +90,7 @@ function fn_query(client: pg.Client, query: Object|string, func: (args?: any) =>
         }
     });
 }
-function fn_insert(client: pg.Client, query: Object|string, func:(args?: any) => any): void {
+function fn_insert(client: pg.Client, query: pg.QueryConfig|string, func:(args?: any) => any): void {
     fn_query(client, query, func());
 }
 
@@ -114,7 +114,7 @@ export function fn_run(): void {
     // Finally, begin the looping scrape for data
     setInterval( () => {
         fn_getGroupData(config);
-    }, Number(process.env.CHECK_INTERVAL) * 60 * 1000);
+    }, (+(process.env.CHECK_INTERVAL) * 60 * 1000 ) );
 }
 
 

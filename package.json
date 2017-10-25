@@ -11,7 +11,9 @@
   "license": "ISC",
   "private": true,
   "devDependencies": {
+    "@types/core-js": "^0.9.43",
     "@types/node": "^8.0.46",
+    "@types/pg": "^7.1.4",
     "typescript": "^2.5.3"
   },
   "dependencies": {

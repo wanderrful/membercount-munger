@@ -7,7 +7,12 @@
         "watch": true,
         "module": "commonjs",
         "noImplicitReturns": true,
-        "removeComments": true
+        "removeComments": true,
+        "types": [
+            "core-js",
+            "node", 
+            "pg"
+        ]
     },
     "exclude": [
         "_scratch/",
