@@ -63,32 +63,7 @@ export default class ScrapeWorker extends pg.Client {
 
 
 
-    /// Class methods
-
-    // Utility function to make console.log have a consistent format
-    fn_log(text: string, args?: any): void {
-        console.log("*** DB ::  ", text, " :: ", args);
-    }
-
-    // Utility function that returns the current timestamp as a convenient JSON object
-    fn_getTimeStamp(): ITimeStamp {
-        let now: Date = new Date();
-        let date: Array<String> = [ String(now.getMonth() + 1), String(now.getDate()), String(now.getFullYear()) ];
-        let time: Array<String> = [ String(now.getHours()) ];
-        for (let i of time) {  
-            if ( Number(i) < 10 ) {
-              i = "0" + i;
-            }
-        }
-        
-        return { 
-            date: date.join("/"),
-            time: time.join(":")
-        };
-    }
-
-
-
+    /// Class functions
     // Use this to access the database.  Called in the constructor.
     fn_login(do_the_thing: () => void): void {
         // Attempt to connect to the PostgreSQL Database!
@@ -130,6 +105,8 @@ export default class ScrapeWorker extends pg.Client {
         });
     }
 
+    
+    
     /// Database query functions!
     // Initialize the master table, if it does not already exist.
     fn_db_initMasterTable(): void {
@@ -150,7 +127,7 @@ export default class ScrapeWorker extends pg.Client {
             this.fn_db_closeConnection();
         });
     }
-    // Utility function to report errors or results from query attempts
+    // Reports errors or results from query attempts
     fn_db_handleQueryResult(err: Error, res: pg.QueryResult, do_the_thing?: () => void) {
         if (err) {
             this.fn_log("QUERY ERROR", err.stack);
@@ -159,7 +136,7 @@ export default class ScrapeWorker extends pg.Client {
         }
         do_the_thing();
     }
-    // Close the connection to the PostgreSQL server!
+    // Closes the connection to the PostgreSQL server!
     fn_db_closeConnection(): void {
         this.end( (err) => {
             if (err) {
@@ -167,5 +144,30 @@ export default class ScrapeWorker extends pg.Client {
             }
             this.fn_log("DISCONNECTED");
         });
+    }
+
+
+    
+    /// Utility functions
+    // To make console.log have a consistent format
+    fn_log(text: string, args?: any): void {
+        console.log("*** DB ::  ", text, " :: ", args);
+    }
+
+    // Returns the current timestamp as a convenient JSON object
+    fn_getTimeStamp(): ITimeStamp {
+        let now: Date = new Date();
+        let date: Array<String> = [ String(now.getMonth() + 1), String(now.getDate()), String(now.getFullYear()) ];
+        let time: Array<String> = [ String(now.getHours()) ];
+        for (let i of time) {  
+            if ( Number(i) < 10 ) {
+              i = "0" + i;
+            }
+        }
+        
+        return { 
+            date: date.join("/"),
+            time: time.join(":")
+        };
     }
 };
