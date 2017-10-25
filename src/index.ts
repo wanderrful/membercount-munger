@@ -1,3 +1,6 @@
-import * as Scrape from "./scrape_utils";
+import ScrapeWorker from "./scrape_utils";
 
-Scrape.fn_run();
+
+
+let worker = new ScrapeWorker();
+worker.fn_login();

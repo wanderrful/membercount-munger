@@ -10,10 +10,68 @@ import * as pg from "pg";               // to record the data
 
 
 
-export interface Config {
+interface Config {
     url: string,
     model: any
 };
+
+
+
+////
+
+
+
+export default class ScrapeWorker extends pg.Client {
+    constructor() {
+        super({});
+
+        this.on("error", (err) => {
+            console.error("*** DB ERROR: ", err.stack);
+        });
+
+        this.on('notice', (msg) => { 
+            console.warn('notice:', msg);
+        });
+    }
+
+    
+    
+    // PostgreSQL query strings
+    public db_initQuery: string = `
+CREATE TABLE IF NOT EXISTS db_membercounts(
+    timestamp text not null primary key, count numeric not null, ingame numeric not null, online numeric not null
+)`;
+    public db_insertQuery: string = `
+INSERT INTO db_membercounts 
+VALUES(
+    $1
+)`;
+
+
+
+    // Class methods
+    fn_login(): void {
+        // Attempt to connect to the PostgreSQL Database!
+        this.connect((err) => {
+            if (err) {
+                console.error("*** DB CONNECTION ERROR: ", err.stack);
+            } else {
+                console.log("*** DB CONNECTION SUCCESSFUL!");
+                
+                // Initialize the Table we will use, if it does not exist
+                this.query({
+                    text: this.db_initQuery
+                }, (err)=>{
+                    console.error("*** QUERY ERROR: ", err.stack);
+                });
+            }
+        });
+    }
+}
+
+
+
+////
 
 
 
@@ -22,10 +80,10 @@ function fn_getGroupData(config: Config): void {
     scrapy.scrape(config.url, config.model, (err,data) => {
         if (err) return console.error(err);
         
-        console.log({
+        return {
             timestamp: fn_getTimeStamp(),
             ...data
-        });
+        };
     });
 }
 
@@ -49,34 +107,13 @@ function fn_getTimeStamp(): Object {
 
 
 
-// PostgreSQL queries
-const db_initQuery: string = `
-CREATE TABLE IF NOT EXISTS db_membercounts(
-    timestamp text not null primary key, count numeric not null, ingame numeric not null, online numeric not null
-)`;
-const db_insertQuery: string = `
-INSERT INTO db_membercounts 
-VALUES(
-    $1
-)`;
+
 
 // PostgreSQL functions
 function fn_connectToDB(): pg.Client {
     const client = new pg.Client({});
 
-    client.connect((err) => {
-        if (err) {
-            console.error("*** DB CONNECTION ERROR: ", err.stack);
-        } else {
-            console.log("*** DB CONNECTION SUCCESSFUL!");
-            fn_query(client, db_initQuery, ()=>{
-
-            });
-        }
-    });
-    client.on("error", (err) => {
-        console.error("*** DB ERROR: ", err.stack);
-    });
+    
 
     return client;
 }
@@ -113,9 +150,6 @@ export function fn_run(): void {
 
     // Finally, begin the looping scrape for data
     setInterval( () => {
-        fn_getGroupData(config);
+        let data = fn_getGroupData(config);
     }, (+(process.env.CHECK_INTERVAL) * 60 * 1000 ) );
 }
-
-
-
