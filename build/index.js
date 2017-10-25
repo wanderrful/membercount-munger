@@ -38,7 +38,7 @@ function fn_login(do_the_thing) {
 }
 function fn_db_initMasterTable() {
     worker.query({
-        text: "CREATE TABLE IF NOT EXISTS db_membercounts(timestamp_date text not null primary key, timestamp_time text not null, count text not null, ingame text not null, online text not null)"
+        text: "CREATE TABLE IF NOT EXISTS db_membercounts(timestamp_date text not null, timestamp_time text not null, count text not null, ingame text not null, online text not null)"
     }, (err, res) => {
         fn_db_handleQueryResult(err, res);
     });
