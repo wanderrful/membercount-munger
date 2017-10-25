@@ -34,7 +34,7 @@ function fn_run(): void {
         
         // Add the new row to the database
         fn_db_writeToDatabase({
-            timestamp: this.fn_getTimeStamp(),
+            timestamp: Scrape.fn_getTimeStamp(),
             ...data
         })
     });

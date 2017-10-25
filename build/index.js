@@ -22,7 +22,7 @@ function fn_run() {
     scrapy.scrape(scrape_config.url, scrape_config.model, (err, data) => {
         if (err)
             return console.error(err);
-        fn_db_writeToDatabase(Object.assign({ timestamp: this.fn_getTimeStamp() }, data));
+        fn_db_writeToDatabase(Object.assign({ timestamp: Scrape.fn_getTimeStamp() }, data));
     });
 }
 function fn_login(do_the_thing) {
