@@ -10,12 +10,6 @@ const config = {
 const worker = new pg.Client({
     connectionString: process.env.DATABASE_URL
 });
-worker.on("error", (err) => {
-    Scrape.fn_log("ERROR:", err.message);
-});
-worker.on('notice', (msg) => {
-    Scrape.fn_log('Notice:', msg.message);
-});
 function fn_run() {
     let scrape_config = {
         url: ("http://steamcommunity.com/groups/" + config.group_name),
@@ -28,9 +22,7 @@ function fn_run() {
     scrapy.scrape(scrape_config.url, scrape_config.model, (err, data) => {
         if (err)
             return console.error(err);
-        fn_login(() => {
-            fn_db_writeToDatabase(Object.assign({ timestamp: this.fn_getTimeStamp() }, data));
-        });
+        fn_db_writeToDatabase(Object.assign({ timestamp: this.fn_getTimeStamp() }, data));
     });
 }
 function fn_login(do_the_thing) {
@@ -49,7 +41,6 @@ function fn_db_initMasterTable() {
         text: "CREATE TABLE IF NOT EXISTS db_membercounts(timestamp_date text not null primary key, timestamp_time text not null, count text not null, ingame text not null, online text not null)"
     }, (err, res) => {
         fn_db_handleQueryResult(err, res);
-        fn_db_closeConnection();
     });
 }
 function fn_db_writeToDatabase(data) {
@@ -58,7 +49,6 @@ function fn_db_writeToDatabase(data) {
         values: [data.timestamp.date, data.timestamp.time, data.count, data.ingame, data.online]
     }, (err, res) => {
         fn_db_handleQueryResult(err, res);
-        fn_db_closeConnection();
     });
 }
 function fn_db_handleQueryResult(err, res) {
@@ -77,6 +67,10 @@ function fn_db_closeConnection() {
         Scrape.fn_log("DISCONNECTED");
     });
 }
+process.on("beforeExit", (code) => {
+    fn_db_closeConnection();
+    Scrape.fn_log("SHUTTING DOWN", code);
+});
 fn_login(fn_db_initMasterTable);
 setInterval(fn_run, config.check_interval);
 //# sourceMappingURL=index.js.map

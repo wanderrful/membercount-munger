@@ -10,19 +10,9 @@ const config: Scrape.IWorkerConfig = {
     check_interval: ( Number(process.env.CHECK_INTERVAL) * 60 * 1000 )
 };
 
-const worker = new pg.Client({
+const worker: pg.Client = new pg.Client({
     connectionString: process.env.DATABASE_URL
 }); //database login details are pulled automatically from environment variables!
-
-
-
-// Worker event handlers
-worker.on("error", (err) => {
-    Scrape.fn_log("ERROR:", err.message);
-});
-worker.on('notice', (msg) => { 
-    Scrape.fn_log('Notice:', msg.message);
-});
 
 
 
@@ -42,13 +32,11 @@ function fn_run(): void {
     scrapy.scrape(scrape_config.url, scrape_config.model, (err,data: Scrape.IModelConfig) => {
         if (err) return console.error(err);
         
-        // Connect to the database, do the thing, and close the connection
-        fn_login( () => {
+        // Add the new row to the database
         fn_db_writeToDatabase({
-                timestamp: this.fn_getTimeStamp(),
-                ...data
-            })
-        });
+            timestamp: this.fn_getTimeStamp(),
+            ...data
+        })
     });
 }
 
@@ -76,7 +64,6 @@ function fn_db_initMasterTable(): void {
         text: "CREATE TABLE IF NOT EXISTS db_membercounts(timestamp_date text not null primary key, timestamp_time text not null, count text not null, ingame text not null, online text not null)"
     }, (err, res) => {
         fn_db_handleQueryResult(err,res);
-        fn_db_closeConnection();
     });
 }
 // Insert a new row into the master table with the given data
@@ -86,7 +73,6 @@ function fn_db_writeToDatabase(data: Scrape.IRowData): void {
         values: [data.timestamp.date, data.timestamp.time, data.count, data.ingame, data.online]
     }, (err, res) => {
         fn_db_handleQueryResult(err,res);
-        fn_db_closeConnection();
     });
 }
 // Reports errors or results from query attempts
@@ -106,6 +92,14 @@ function fn_db_closeConnection(): void {
         Scrape.fn_log("DISCONNECTED");
     });
 }
+
+
+
+// Shut down gracefully
+process.on("beforeExit", (code) => {
+    fn_db_closeConnection();
+    Scrape.fn_log("SHUTTING DOWN", code);
+});
 
 
 
