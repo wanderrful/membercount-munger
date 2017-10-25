@@ -45,7 +45,9 @@ export default class ScrapeWorker extends pg.Client {
     
     /// Constructor
     constructor(config: IWorkerConfig) {
-        super({}); //database login details are pulled automatically from environment variables!
+        super({
+            connectionString: process.env.DATABASE_URL
+        }); //database login details are pulled automatically from environment variables!
 
         this.on("error", (err) => {
             this.fn_log("ERROR:", err.stack);
