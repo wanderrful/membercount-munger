@@ -57,7 +57,7 @@ function fn_login(do_the_thing: () => void): void {
 
 
 
-/// Database query functions!
+/// Database functions!
 // Initialize the master table, if it does not already exist.
 function fn_db_initMasterTable(): void {
     worker.query({
