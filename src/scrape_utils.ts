@@ -45,7 +45,7 @@ export function fn_log(text: string, args: any = "--"): void {
 export function fn_getTimeStamp(): ITimeStamp {
     let now: Date = new Date();
     let date: Array<String> = [ String(now.getMonth() + 1), String(now.getDate()), String(now.getFullYear()) ];
-    let time: Array<String> = [ String(now.getHours() + 9) ]; //adjusting 9 hours for UTC+9
+    let time: Array<String> = [ String((now.getHours() + 9) % 24) ]; //adjusting 9 hours for UTC+9
     for (let i of time) {  
         if ( Number(i) < 10 ) {
             i = "0" + i;
