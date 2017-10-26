@@ -1,16 +1,3 @@
-/* 
- * This ScrapeWorker class is meant to be run by a worker via one of 
- * Heroku's Dyno things.
- *
- * Its purpose is to monitor the Steam group's player counts and
- * record the data so that I can figure out when most of my friends
- * are online. That way, I can know when the best times to host group
- * events are!
- * 
- */
-
-
-
 /// Interface structs
 export interface IWorkerConfig {
     group_name: string,
@@ -44,16 +31,14 @@ export function fn_log(text: string, args: any = "--"): void {
 // Returns the current timestamp as a convenient JSON object
 export function fn_getTimeStamp(): ITimeStamp {
     let now: Date = new Date();
-    let date: Array<String> = [ String(now.getMonth() + 1), String(now.getDate()), String(now.getFullYear()) ];
-    let time: Array<String> = [ String((now.getHours() + 9) % 24) ]; //adjusting 9 hours for UTC+9
-    for (let i of time) {  
-        if ( Number(i) < 10 ) {
-            i = "0" + i;
-        }
+    let date: string = String(now.getDay());
+    let time: string = String((now.getHours() + 9) % 24); //adjusting 9 hours for UTC+9
+    if ( Number(time) < 10 ) {
+        time = "0" + time;
     }
     
     return { 
-        date: date.join("/"),
-        time: time.join(":")
+        date: date,
+        time: time
     };
 }
