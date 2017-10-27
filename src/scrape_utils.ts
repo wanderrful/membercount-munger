@@ -32,7 +32,7 @@ export function fn_log(text: string, args: any = "--"): void {
 export function fn_getTimeStamp(): ITimeStamp {
     let now: Date = new Date();
     let date: string = String(now.getDay());
-    let time: string = String((now.getHours() + 9) % 24); //adjusting 9 hours for UTC+9
+    let time: string = String((now.getHours()) % 24); //adjusting 9 hours for UTC+9
     if ( Number(time) < 10 ) {
         time = "0" + time;
     }
